@@ -1,0 +1,3 @@
+Tunnel SSH : dans un terminal à garder ouvert, mettre la commande du README, sans le &. Taper le mdp, puis faire le reste dans un autre terminal.
+
+Les moves sont des int entre 0 et 3. NORTH, EAST etc, ça marche pas (ou en tt cas, autrement mais jsp comment)

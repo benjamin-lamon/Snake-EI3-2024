@@ -1,12 +1,9 @@
 all : run
 
-run : clean
-	/.bruh
+run : build
+	./bruh
 
-clean : build
-	rm -f *.o*
-
-build : snek.o clientAPI.o
+build : snek.o clientAPI.o snakeAPI.o
 	gcc -o bruh snek.o clientAPI.o snakeAPI.o
 
 snek.o : snek.c
@@ -17,3 +14,7 @@ clientAPI.o : clientAPI.c snakeAPI.o
 
 snakeAPI.o : snakeAPI.c
 	gcc -o snakeAPI.o -c snakeAPI.c
+
+clean : 
+	rm -f *.o
+	rm bruh
