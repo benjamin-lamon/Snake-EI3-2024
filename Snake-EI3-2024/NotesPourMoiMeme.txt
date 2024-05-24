@@ -1,3 +1,11 @@
 Tunnel SSH : dans un terminal à garder ouvert, mettre la commande du README, sans le &. Taper le mdp, puis faire le reste dans un autre terminal.
 
 Les moves sont des int entre 0 et 3. NORTH, EAST etc, ça marche pas (ou en tt cas, autrement mais jsp comment)
+
+Coordonnées : 	chaque point représente une coordonnée. On commence du point le plus en haut à gauche. Les indices commencent à 0.
+
+				Càd : le / est sur la  coordonnée (0;0), le # sur la (2;2). Il y a un mur entre (0;2) et (1;2).
+				/ . .
+				. . .
+				.|. #
+				
