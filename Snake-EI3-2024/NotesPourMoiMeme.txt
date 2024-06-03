@@ -8,4 +8,6 @@ Coordonnées : 	chaque point représente une coordonnée. On commence du point l
 				/ . .
 				. . .
 				.|. #
+
+Relire tous les commentaires avant de commencer à coder... (+ le code, accessoirement. On sait jamais...)
 				
