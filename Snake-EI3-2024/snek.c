@@ -4,6 +4,7 @@ author: bain à main, whoever that is...
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 #include "snakeAPI.h"
 
 
@@ -34,15 +35,15 @@ typedef struct point_{
 
 //Structure des données dont on a besoin dans initGame
 typedef struct gameData_{
-    int* sizeX;
-    int* sizeY;
-    int* nbWalls;
-    char* gameName;
-    char* gameType;
+    int sizeX;
+    int sizeY;
+    int nbWalls;
+    char gameName[50];
+    char gameType[150];
     int* walls; //Il faudra l'allouer dynamiquement I guess
-                //Problème : si on le fait depuis initGame, l'adresse qu'on utilisera sera dans la fonction, donc inutilisable une fois
-                // qu'on sort de la fonction
-                // créer une variable globale ?
+                //Problème: si on le fait depuis initGame, l'adresse qu'on utilisera sera dans la fonction, donc inutilisable une fois
+                //          qu'on sort de la fonction
+                // Créer une variable globale ?
 } gameData;
 
 
@@ -58,7 +59,7 @@ void initGame(gameData*);
 
 
 void main(){
-    gameData* data = (gameData*)malloc(sizeof(gameData*)); //Données que initGame va utiliser/modifier
+    gameData* data = (gameData*)malloc(sizeof(gameData)); //Données que initGame va utiliser/modifier
     initGame(data);
     //tout ce qu'on utilise dans initGame reste dedans => tous les tableaux, nbWalls etc. sont à mettre en paramètre de la fonction.
     //ainsi elle modifiera des adresses mémoire de variables qui ne sont pas dedans et qu'on pourra réutiliser plus tard
@@ -72,8 +73,8 @@ void main(){
     while (1){
         printArena();
         //sleep(1.5);
-        
-        if (!start){
+
+        if (start){
             playMove();
             calcNxtMove();
         }
@@ -90,15 +91,17 @@ void main(){
 void initGame(gameData* data){
     // Faire une structure avec les données dont on a besoin dans initGame ?
     connectToServer("localhost",1234,"bruh");
-    data->gameType = "TRAINING SUPER_PLAYER difficulty=1 timeout=7 seed=123 start=0";
-    waitForSnakeGame(data->gameType, data->gameName, data->sizeX, data->sizeY, data->nbWalls);
+    strcpy(data->gameType, "TRAINING SUPER_PLAYER difficulty=1 timeout=7 seed=123 start=0");
+    waitForSnakeGame(data->gameType, data->gameName, &(data->sizeX), &(data->sizeY), &(data->nbWalls));
+    printf("test\n");
+
     // waitForSnakeGame(gameType, gameName, &sizeX, &sizeY, &nbWalls);
     int temp = data->nbWalls;
-    int walls[4*temp];
+    // int walls[(4*temp)];
     printf("%d\n",temp);
     // si getSnakeArena retourne 0, on commence. Par ailleurs, on remplit "walls", un tableau contenant les coordonnées des murs.
     // faire un tableau 4*nbWalls pour avoir des vecteurs de 4 int (pour les coordonnées des murs) ?
-    int* walls = (int*)malloc(data->nbWalls * sizeof(int*));
+    int* walls = (int*)malloc(data->nbWalls * 4 * sizeof(int));
     int start = getSnakeArena(walls);
 
     int structure[data->nbWalls][4];
@@ -117,10 +120,6 @@ void initGame(gameData* data){
 
     //J'imagine qu'il faut aussi mettre les bordures de l'arène.
     //TODO
-
-
-
-
     // // DEBUG et compréhension : pour voir l'arène ainsi que les coordonnées des murs
     // // (c'était avant l'élaboration de la structure de données. Ça marche toujours en revanche ça sert moins (voire pas du tout)).
     // printArena();
@@ -139,9 +138,11 @@ void initGame(gameData* data){
 void playMove(){
     /*Calcule (en principe) et joue le prochain move*/
     printf("Normalement ça joue là\n");
-    t_move move;
+    int move;
     scanf("%d",&move);
-    sendMove(move); //Voir si le return code nous sert. Normal = 0; (moi) Win = 1; (moi) je Lose = -1;
+    printf("lalalala\n");
+
+    sendMove((t_move) move); //Voir si le return code nous sert. Normal = 0; (moi) Win = 1; (moi) je Lose = -1;
 
     //ajouter une fonction qui permet d'ajouter le move dans la liste chaînée.
     //La fonction en question calculera les coordonées utilisées par le snake qu'on joue.
