@@ -69,7 +69,7 @@ void closeConnection();
  * - sizeX, sizeY: (int*) pointers to the dimension of the game (filled by the server)
  * - nbWalls: (int*) pointer to the number of walls
  *
-* gameType is a string like "GAME key1=value1 key2=value1 ..."
+ * gameType is a string like "GAME key1=value1 key2=value1 ..."
  * - It indicates the type of the game you want to plys
  *   it could be "TRAINING <BOT>" to play against bot <BOT>
  *   or "TOURNAMENT xxxx" to join the tournament xxxx
@@ -77,7 +77,7 @@ void closeConnection();
  * - key=value pairs are used for options (each training player has its own options)
  *   invalid keys are ignored, invalid values leads to error
  *   the following options are common to every training player
-  *        - 'timeout': allows and define the timeout when training (in seconds)
+ *        - 'timeout': allows and define the timeout when training (in seconds)
  *        - 'seed': allows to set the seed of the random generator
  *        - 'start': allows to set who starts (0 or 1)
  *        - 'difficulty': between 0 (no walls) and 3 (a lot of walls); 2 is the default value
@@ -93,7 +93,7 @@ void waitForSnakeGame(char* gameType, char* gameName, int* sizeX, int* sizeY, in
  * Get the data and tell who starts
  *
  * Parameters:
-  * - walls: (int*) array of nbWalls*4 integers (x1, y1, x2 , y2 for a wall between (x1,y1) and (x2,y2))
+ * - walls: (int*) array of nbWalls*4 integers (x1, y1, x2 , y2 for a wall between (x1,y1) and (x2,y2))
  *   (the pointer data MUST HAVE allocated, the size if given with `waitForSnakeGame`)
  *
  * Returns 0 if you begin, or 1 if the opponent begins
