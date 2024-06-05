@@ -12,11 +12,36 @@ author: bain à main, whoever that is...
 void main(){
     gameData* data = (gameData*)malloc(sizeof(gameData)); //Données que initGame va utiliser/modifier
     initGame(data);
-
     printf("%d\n",data->tabMurs[1][1]);
     //tout ce qu'on utilise dans initGame reste dedans => tous les tableaux, nbWalls etc. sont à mettre en paramètre de la fonction.
     //ainsi elle modifiera des adresses mémoire de variables qui ne sont pas dedans et qu'on pourra réutiliser plus tard
     // -> structure gameData
+
+
+    arene* Arena = (arene*)malloc(sizeof(arene));
+    remplirTab(Arena,data);
+
+    // // DEBUG : voir si le tableau est rempli correctement aux coordonnées (x;y) ; à comparer avec printArena.
+    // // -> remplirTab FONCTIONNE
+    // int x = 0;
+    // int y = 0;
+    // printf("(%d;%d) N:%d S:%d E:%d O:%d \n",x,y, Arena->arene[x][y].N,Arena->arene[x][y].S,Arena->arene[x][y].E,Arena->arene[x][y].O);
+
+    // x = 1;
+    // printf("(%d;%d) N:%d S:%d E:%d O:%d \n",x,y, Arena->arene[x][y].N,Arena->arene[x][y].S,Arena->arene[x][y].E,Arena->arene[x][y].O);
+
+    // x = data->sizeX - 1;
+    // y = data->sizeY - 1;
+    // printf("(%d;%d) N:%d S:%d E:%d O:%d \n",x,y, Arena->arene[x][y].N,Arena->arene[x][y].S,Arena->arene[x][y].E,Arena->arene[x][y].O);
+
+    // x = 4;
+    // y = 1;
+    // printf("(%d;%d) N:%d S:%d E:%d O:%d \n",x,y, Arena->arene[x][y].N,Arena->arene[x][y].S,Arena->arene[x][y].E,Arena->arene[x][y].O);
+
+    // x = 18;
+    // y = 8;  
+    // printf("(%d;%d) N:%d S:%d E:%d O:%d \n",x,y, Arena->arene[x][y].N,Arena->arene[x][y].S,Arena->arene[x][y].E,Arena->arene[x][y].O);
+
 
     t_move move;
     t_move moveAdv;
@@ -74,6 +99,8 @@ void initGame(gameData* data){
         }
     }
 
+    free(wallsInitial);
+
     //J'imagine qu'il faut aussi mettre les bordures de l'arène.
     //TODO
     // // DEBUG et compréhension : pour voir l'arène ainsi que les coordonnées des murs
@@ -113,25 +140,37 @@ void calcNxtMove(){
     //La fonction en question calculera les coordonées utilisées par le snake adverse.
 }
 
-void remplirTab(arene* Arena, gameData* data, int* walls){
+void remplirTab(gameData* data){
     /*
-    Remplit un tableau "Arena" de points à partir des données reçues par le jeu (depuis la fonction getSnakeArena).
+    Remplit un tableau "data" de points à partir des données reçues par le jeu 
+    (depuis la fonction getSnakeArena dans initGame qui a écrit dans data->tabMurs).
     */
 
     //allocation de l'arene en points càd point[sizeX][sizeY];
-    Arena->arene = (point**)malloc(data->sizeX*sizeof(point*));
-    for (int i = 0; i<data->sizeX; i++){
-        Arena->arene[i] = (point*)malloc(data->sizeY*sizeof(point));
+    data->arene = (point**)malloc(data->sizeX*sizeof(point*));
+    for (int x = 0; i<data->sizeX; x++){
+        data->arene[x] = (point*)malloc(data->sizeY*sizeof(point));
+    }
+
+    // Initialiser NSEO à false
+    //remplacer i;j par x;y
+    for (int i = 0; i < data->sizeX; i++){          
+        for (int j = 0; j < data->sizeY; j++){
+            data->arene[i][j].N = false;
+            data->arene[i][j].S = false;
+            data->arene[i][j].E = false;
+            data->arene[i][j].O = false;
+        }
     }
 
     //remplir les bordures de l'arène
     for (int i = 0; i<data->sizeX; i++){
-        Arena->arene[i][0].N = 1;
-        Arena->arene[i][data->sizeY-1].S = true;
+        data->arene[i][0].N = true;
+        data->arene[i][data->sizeY-1].S = true;
     }
     for (int j = 0; j<data->sizeY; j++){
-        Arena->arene[0][j].O = 1;
-        Arena->arene[data->sizeX-1][j].E = true;
+        data->arene[0][j].O = true;
+        data->arene[data->sizeX-1][j].E = true;
     }
 
     //remplir les données des murs
@@ -151,36 +190,38 @@ void remplirTab(arene* Arena, gameData* data, int* walls){
                 if ((x == x1) && (y == y1)){
                     if (y1 == y2){
                         if (x1 < x2){
-                            Arena->arene[x][y].E = true;
+                            data->arene[x][y].E = true;
+                            // data->arene[x][y].O = false;
                         }
                         else{
-                            Arena->arene[x][y].O = true;
+                            data->arene[x][y].O = true;
+                            // data->arene[x][y].E = false;
                         }
                     }
                     if (x1 == x2){
                         if (y1 < y2){
-                            Arena->arene[x][y].S = true;
+                            data->arene[x][y].S = true;
                         }
                         else{
-                            Arena->arene[x][y].N = true;
+                            data->arene[x][y].N = true;
                         }
                     }
                 }
                 else if((x == x2)&&(y == y2)){
                     if (y2 == y1){
                         if (x2 < x1){
-                            Arena->arene[x][y].E = true;
+                            data->arene[x][y].E = true;
                         }
                         else{
-                            Arena->arene[x][y].O = true;
+                            data->arene[x][y].O = true;
                         }
                     }
                     else if (x2 == x1){
                         if (y2 < y1){
-                            Arena->arene[x][y].S = true;
+                            data->arene[x][y].S = true;
                         }
                         else{
-                            Arena->arene[x][y].N = true;
+                            data->arene[x][y].N = true;
                         }
                     }
                 }
@@ -219,6 +260,8 @@ void remplirTab(arene* Arena, gameData* data, int* walls){
 //      --> P-ê réorganiser "walls" en créant un tableau de structures x1,y1,x2,y2 et à chaque item dudit tableau, on peut remplir le tableau
 //          de struct NSEO.
 //              --> Inutile, on ne s'en servira qu'une fois en principe. Autant ne pas gâcher de mémoire.
+//              --> oups... trop tard.
+//              --> y'a peut-être une redondance de données dans Data, à voir
 //          À chaque item du tableau (les 4 coords), on déduit dans un premier temps sur quel point cardinal se trouve le mur à partir des coordonnées.
 //          On remplit alors le tableau de struct NSEO. On remplit aussi le mur sur la case de la deuxième coordonnée.
 //          On fait ça pour tous les points du tableau.
@@ -245,6 +288,8 @@ void remplirTab(arene* Arena, gameData* data, int* walls){
 // 
 // Calculer où peuvent aller les deux serpents ?
 // attention à gérer la taille pour stocker la position du serpent (?)
+//  ->  la taille du serpent augmente. Donc la place qu'il prend en mémoire aussi, donc faut gérer tout ça
+//      (normalement pas trop compliqué vu que c'est une liste (doublement) chaînée)
 // refaire un printarena à partir de la structure et de ce qu'on a dedans
 // dans la structure NSEO, mettre un pointeur vers la case du serpent qui est sur la case (pourquoi faire ?)
 // besoin de savoir s'il y a des murs et si y'a un serpent, le tout dans une seule structure
