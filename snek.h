@@ -38,7 +38,7 @@ typedef struct gameData_{
     int nbWalls;
 	int start;
     char gameName[50];
-    char gameType[150];
+    // char gameType[150];
     int* walls; //Il faudra l'allouer dynamiquement I guess
                 //Problème: si on le fait depuis initGame, l'adresse qu'on utilisera sera dans la fonction, donc inutilisable une fois
                 //          qu'on sort de la fonction
@@ -48,7 +48,7 @@ typedef struct gameData_{
 } gameData;
 
 
-void initGame(gameData*);
-void remplirTab(arene*, gameData*);
+void initGame(gameData* p_data);
+void remplirTab(gameData* p_data);
 void playMove();
 void calcNxtMove();

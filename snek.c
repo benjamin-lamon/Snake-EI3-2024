@@ -10,16 +10,17 @@ author: bain à main, whoever that is...
 
 
 void main(){
-    gameData* data = (gameData*)malloc(sizeof(gameData)); //Données que initGame va utiliser/modifier
-    initGame(data);
-    printf("%d\n",data->tabMurs[1][1]);
+    // gameData* data = (gameData*)malloc(sizeof(gameData)); //Données que initGame va utiliser/modifier
+    gameData data;
+    initGame(&data);
+    printf("%d\n",data.tabMurs[1][1]);
     //tout ce qu'on utilise dans initGame reste dedans => tous les tableaux, nbWalls etc. sont à mettre en paramètre de la fonction.
     //ainsi elle modifiera des adresses mémoire de variables qui ne sont pas dedans et qu'on pourra réutiliser plus tard
     // -> structure gameData
 
 
-    arene* Arena = (arene*)malloc(sizeof(arene));
-    remplirTab(Arena,data);
+    // arene* Arena = (arene*)malloc(sizeof(arene));
+    remplirTab(&data);
 
     // // DEBUG : voir si le tableau est rempli correctement aux coordonnées (x;y) ; à comparer avec printArena.
     // // -> remplirTab FONCTIONNE
@@ -49,7 +50,7 @@ void main(){
         printArena();
         //sleep(1.5);
 
-        if (!data->start){
+        if (!data.start){
             playMove();
             calcNxtMove();
         }
@@ -63,38 +64,33 @@ void main(){
 };
 
 
-void initGame(gameData* data){
+void initGame(gameData* p_data){
     // Faire une structure avec les données dont on a besoin dans initGame ?
     connectToServer("localhost",1234,"bruh");
-    strcpy(data->gameType, "TRAINING SUPER_PLAYER difficulty=1 timeout=7 seed=123 start=0");
-    waitForSnakeGame(data->gameType, data->gameName, &(data->sizeX), &(data->sizeY), &(data->nbWalls));
+    // strcpy(p_data->gameType, "TRAINING SUPER_PLAYER difficulty=1 timeout=7 seed=123 start=0"); //gameType ne servira pas. 
+    waitForSnakeGame("TRAINING SUPER_PLAYER difficulty=1 timeout=7 seed=123 start=0", p_data->gameName, &(p_data->sizeX), &(p_data->sizeY), &(p_data->nbWalls));
     // waitForSnakeGame(gameType, gameName, &sizeX, &sizeY, &nbWalls);
-    int temp = data->nbWalls;
-    // int walls[(4*temp)];
-    printf("%d\n",temp);
+    // int temp = p_data->nbWalls;
+    // // int walls[(4*temp)];
+    // printf("%d\n",temp);
     // si getSnakeArena retourne 0, on commence. Par ailleurs, on remplit "walls", un tableau contenant les coordonnées des murs.
     // faire un tableau 4*nbWalls pour avoir des vecteurs de 4 int (pour les coordonnées des murs) ?
-    int* wallsInitial = (int*)malloc(data->nbWalls * 4 * sizeof(int));
-    data->start = getSnakeArena(wallsInitial);
-
-    int l = 0;
-    int k = 0;
+    int* wallsInitial = (int*)malloc(p_data->nbWalls * 4 * sizeof(int));
+    p_data->start = getSnakeArena(wallsInitial);
 
     //Il ne s'agit pas de la structure avec laquelle on va travailler par la suite, mais d'une "pré-structure" dans laquelle on va
     //mettre chaque set de 4 coordonnées
-    data->tabMurs = (int**) malloc(data->nbWalls*sizeof(int*));
-    for (int i = 0; i<data->nbWalls; i++){
-        data->tabMurs[i] = (int*)malloc(4*sizeof(int));
+    p_data->tabMurs = (int**) malloc(p_data->nbWalls*sizeof(int*));
+    for (int i = 0; i<p_data->nbWalls; i++){
+        p_data->tabMurs[i] = (int*)malloc(4*sizeof(int));
     }
 
 
-
-
     // Complète le tableau (et affiche les coordonnées des murs si on décommente)
-    for (k = 0; k<data->nbWalls; k++){
-        for (l = 0; l<4; l++){
-        data->tabMurs[k][l] = wallsInitial[4*k+l];
-        printf("%d \n",data->tabMurs[k][l]);
+    for (int k = 0; k<p_data->nbWalls; k++){
+        for (int l = 0; l<4; l++){
+        p_data->tabMurs[k][l] = wallsInitial[4*k+l];
+        printf("%d \n",p_data->tabMurs[k][l]);
         if (l==3) printf("-------\n");
         }
     }
@@ -140,7 +136,7 @@ void calcNxtMove(){
     //La fonction en question calculera les coordonées utilisées par le snake adverse.
 }
 
-void remplirTab(gameData* data){
+void remplirTab(gameData* data){ //modifier le nom pour mettre un pointeur à la place
     /*
     Remplit un tableau "data" de points à partir des données reçues par le jeu 
     (depuis la fonction getSnakeArena dans initGame qui a écrit dans data->tabMurs).
@@ -148,7 +144,7 @@ void remplirTab(gameData* data){
 
     //allocation de l'arene en points càd point[sizeX][sizeY];
     data->arene = (point**)malloc(data->sizeX*sizeof(point*));
-    for (int x = 0; i<data->sizeX; x++){
+    for (int x = 0; x<data->sizeX; x++){
         data->arene[x] = (point*)malloc(data->sizeY*sizeof(point));
     }
 
@@ -175,60 +171,42 @@ void remplirTab(gameData* data){
 
     //remplir les données des murs
     int x1,y1,x2,y2;
-    for (int x = 0; x<data->sizeX; x++){
-        for (int y = 0; y<data->sizeY; y++){
-            //Pour chaque point, on parcourt toutes les coordonnées des murs.
-            for (int k = 0; k<data->nbWalls; k++){
-                x1 = data->tabMurs[k][0];
-                y1 = data->tabMurs[k][1];
-                x2 = data->tabMurs[k][2];
-                y2 = data->tabMurs[k][3];
+   
+    //Pour chaque point, on parcourt toutes les coordonnées des murs.
+    for (int k = 0; k<data->nbWalls; k++){
+        x1 = data->tabMurs[k][0];
+        y1 = data->tabMurs[k][1];
+        x2 = data->tabMurs[k][2];
+        y2 = data->tabMurs[k][3];
 
-                // Si (x;y) et (x1;y1) matchent, on check où se trouve le mur. Quand on l'a trouvé, on modifie le flag 
-                // (N, S, E ou O) du point de l'arène.
-                // On refait la même chose avec (x2;y2) juste après.
-                if ((x == x1) && (y == y1)){
-                    if (y1 == y2){
-                        if (x1 < x2){
-                            data->arene[x][y].E = true;
-                            // data->arene[x][y].O = false;
-                        }
-                        else{
-                            data->arene[x][y].O = true;
-                            // data->arene[x][y].E = false;
-                        }
-                    }
-                    if (x1 == x2){
-                        if (y1 < y2){
-                            data->arene[x][y].S = true;
-                        }
-                        else{
-                            data->arene[x][y].N = true;
-                        }
-                    }
-                }
-                else if((x == x2)&&(y == y2)){
-                    if (y2 == y1){
-                        if (x2 < x1){
-                            data->arene[x][y].E = true;
-                        }
-                        else{
-                            data->arene[x][y].O = true;
-                        }
-                    }
-                    else if (x2 == x1){
-                        if (y2 < y1){
-                            data->arene[x][y].S = true;
-                        }
-                        else{
-                            data->arene[x][y].N = true;
-                        }
-                    }
-                }
+        // Si (x;y) et (x1;y1) matchent, on check où se trouve le mur. Quand on l'a trouvé, on modifie le flag 
+        // (N, S, E ou O) du point de l'arène.
+        // On refait la même chose avec (x2;y2) juste après.
+        // if ((x == x1) && (y == y1)){
+        if (y1 == y2){
+            if (x1 < x2){
+                data->arene[x1][y1].E = true;
+                data->arene[x2][y2].O = true;
+            }
+            else{
+                data->arene[x1][y1].O = true;
+                data->arene[x2][y2].E = true;
+            }
+        }
+        if (x1 == x2){
+            if (y1 < y2){
+                data->arene[x1][y1].S = true;
+                data->arene[x2][y2].N = true;
+            }
+            else{
+                data->arene[x1][y1].N = true;
+                data->arene[x2][y2].S = true;
             }
         }
     }
 }
+
+
 
 
 
