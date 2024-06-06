@@ -11,8 +11,8 @@ typedef struct snakeCase_{
 //structrue snake
 //Debut, fin , nbtours ?
 typedef struct Snake_{
-    snakeCase* debut;
-    snakeCase* fin;
+    snakeCase* Tete;
+    snakeCase* Queue;
     int nbTours;
 } Snake;
 
@@ -53,6 +53,6 @@ typedef struct gameData_{
 
 void initGame(gameData* p_data);
 void remplirTab(gameData* p_data);
-void playMove(); //maj des snakes
-void calcNxtMove();
+void playMove(gameData* p_data); //maj des snakes (dans data.joueurs)
+void calcNxtMove(gameData* p_data);
 void initsnake();
