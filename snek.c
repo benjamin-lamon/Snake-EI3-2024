@@ -26,22 +26,25 @@ void main(){
     // // -> remplirTab FONCTIONNE
     // int x = 0;
     // int y = 0;
-    // printf("(%d;%d) N:%d S:%d E:%d O:%d \n",x,y, Arena->arene[x][y].N,Arena->arene[x][y].S,Arena->arene[x][y].E,Arena->arene[x][y].O);
+    // printf("(%d;%d) N:%d S:%d E:%d O:%d \n",x,y, data.arene[x][y].N,data.arene[x][y].S,data.arene[x][y].E,data.arene[x][y].O);
 
     // x = 1;
-    // printf("(%d;%d) N:%d S:%d E:%d O:%d \n",x,y, Arena->arene[x][y].N,Arena->arene[x][y].S,Arena->arene[x][y].E,Arena->arene[x][y].O);
+    // printf("(%d;%d) N:%d S:%d E:%d O:%d \n",x,y, data.arene[x][y].N,data.arene[x][y].S,data.arene[x][y].E,data.arene[x][y].O);
 
-    // x = data->sizeX - 1;
-    // y = data->sizeY - 1;
-    // printf("(%d;%d) N:%d S:%d E:%d O:%d \n",x,y, Arena->arene[x][y].N,Arena->arene[x][y].S,Arena->arene[x][y].E,Arena->arene[x][y].O);
+    // x = data.sizeX - 1;
+    // y = data.sizeY - 1;
+    // printf("(%d;%d) N:%d S:%d E:%d O:%d \n",x,y, data.arene[x][y].N,data.arene[x][y].S,data.arene[x][y].E,data.arene[x][y].O);
 
     // x = 4;
     // y = 1;
-    // printf("(%d;%d) N:%d S:%d E:%d O:%d \n",x,y, Arena->arene[x][y].N,Arena->arene[x][y].S,Arena->arene[x][y].E,Arena->arene[x][y].O);
+    // printf("(%d;%d) N:%d S:%d E:%d O:%d \n",x,y, data.arene[x][y].N,data.arene[x][y].S,data.arene[x][y].E,data.arene[x][y].O);
 
     // x = 18;
     // y = 8;  
-    // printf("(%d;%d) N:%d S:%d E:%d O:%d \n",x,y, Arena->arene[x][y].N,Arena->arene[x][y].S,Arena->arene[x][y].E,Arena->arene[x][y].O);
+    // printf("(%d;%d) N:%d S:%d E:%d O:%d \n",x,y, data.arene[x][y].N,data.arene[x][y].S,data.arene[x][y].E,data.arene[x][y].O);
+
+
+
 
 
     t_move move;
@@ -50,7 +53,11 @@ void main(){
         printArena();
         //sleep(1.5);
 
-        if (!data.start){
+        //si c'est à moi de jouer, je joue puis j'update l'arene avec le coup que je veins de faire
+        // Si c'est à lui, on getmove (aka calcnextmove ici) puis on update l'arène avec le coup qui vient d'être joué
+        // -> fonction qui, quand on lui donne un coup, màj l'arène (càd les serpents pcq les murs sont statiques)
+        //      -> moi ou opposant (même algo)
+        if (!data.turn){
             playMove();
             calcNxtMove();
         }
@@ -67,16 +74,17 @@ void main(){
 void initGame(gameData* p_data){
     // Faire une structure avec les données dont on a besoin dans initGame ?
     connectToServer("localhost",1234,"bruh");
-    // strcpy(p_data->gameType, "TRAINING SUPER_PLAYER difficulty=1 timeout=7 seed=123 start=0"); //gameType ne servira pas. 
     waitForSnakeGame("TRAINING SUPER_PLAYER difficulty=1 timeout=7 seed=123 start=0", p_data->gameName, &(p_data->sizeX), &(p_data->sizeY), &(p_data->nbWalls));
     // waitForSnakeGame(gameType, gameName, &sizeX, &sizeY, &nbWalls);
     // int temp = p_data->nbWalls;
     // // int walls[(4*temp)];
     // printf("%d\n",temp);
+
+
     // si getSnakeArena retourne 0, on commence. Par ailleurs, on remplit "walls", un tableau contenant les coordonnées des murs.
     // faire un tableau 4*nbWalls pour avoir des vecteurs de 4 int (pour les coordonnées des murs) ?
     int* wallsInitial = (int*)malloc(p_data->nbWalls * 4 * sizeof(int));
-    p_data->start = getSnakeArena(wallsInitial);
+    p_data->turn = getSnakeArena(wallsInitial);
 
     //Il ne s'agit pas de la structure avec laquelle on va travailler par la suite, mais d'une "pré-structure" dans laquelle on va
     //mettre chaque set de 4 coordonnées
@@ -90,27 +98,50 @@ void initGame(gameData* p_data){
     for (int k = 0; k<p_data->nbWalls; k++){
         for (int l = 0; l<4; l++){
         p_data->tabMurs[k][l] = wallsInitial[4*k+l];
-        printf("%d \n",p_data->tabMurs[k][l]);
-        if (l==3) printf("-------\n");
+        // printf("%d \n",p_data->tabMurs[k][l]);
+        // if (l==3) printf("-------\n");
         }
     }
-
     free(wallsInitial);
 
-    //J'imagine qu'il faut aussi mettre les bordures de l'arène.
-    //TODO
-    // // DEBUG et compréhension : pour voir l'arène ainsi que les coordonnées des murs
-    // // (c'était avant l'élaboration de la structure de données. Ça marche toujours en revanche ça sert moins (voire pas du tout)).
-    // printArena();
-    // int j = 0;
-    // for (int i = 0; i < 4*nbWalls; i++){
-    //     printf("%d \n",walls[i]);
-    //     j++;
-    //     if (j == 4){
-    //         printf("----------\n");
-    //         j = 0;
-    //     }
+
+    //Tableau des deux snakes
+    p_data->joueurs = (Snake*)malloc(2*sizeof(Snake));
+
+    // //Probablement inutile, c'est pas un tableau 2D qu'on manipule ici...
+    // //On n'a et on n'aura toujours que deux snakes, pas besoin de for loop
+    // for (int j = 0; j < 2; j++){
+    //     p_data->joueurs[j] = (Snake*)malloc(sizeof(Snake));
     // }
+
+    // //Initialisation des deux snakes
+
+    //initialisation dynamique d'un snake
+    Snake* mySnake = (Snake*)malloc(sizeof(Snake));
+    snakeCase* myCase = (snakeCase*)malloc(sizeof(snakeCase));
+    myCase->prev = NULL;
+    myCase->next = NULL;
+    myCase->x = 1; // pas sûr
+    myCase->y = (p_data->sizeY)/2;
+
+    mySnake->debut = myCase;
+    mySnake->fin = myCase;
+    mySnake->nbTours = 0; //ou 1 ?
+
+    //Opponant snake
+    Snake* opSnake = (Snake*)malloc(sizeof(Snake));
+    snakeCase* opCase = (snakeCase*)malloc(sizeof(snakeCase));
+    opCase->prev = NULL;
+    opCase->next = NULL;
+    opCase->x = p_data->sizeX; // pas sûr
+    opCase->y = (p_data->sizeY)/2;
+
+    opSnake->debut = myCase;
+    opSnake->fin = myCase;
+    opSnake->nbTours = 0; //ou 1 ?
+
+    
+
 }
 
 
@@ -275,3 +306,7 @@ void remplirTab(gameData* data){ //modifier le nom pour mettre un pointeur à la
 // battre random_player = 12/20
 // Tout refaire sur papier avec des schémas et tout pour bien comprendre
 // Préciser toutes les variables
+
+
+// dans initgame, positionner les serpents càd créer la tête, la queue et les cases
+// 
