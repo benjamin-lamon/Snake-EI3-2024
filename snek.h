@@ -36,7 +36,7 @@ typedef struct gameData_{
     int sizeX;
     int sizeY;
     int nbWalls;
-	int turn;
+	int start;   //à renommer en start
     char gameName[50];
     // char gameType[150];
     int* walls; //Il faudra l'allouer dynamiquement I guess
@@ -48,11 +48,14 @@ typedef struct gameData_{
     // Snake moi;
     // Snake opposant; //tableau de deux snakes ? Choix depuis ce que retourne getSnakeArena aka turn, potentiellement
     Snake* joueurs; //Tableau des 2 snakes
+    int tour; //Compteur. À utiliser au lieu du compteur global avant le main.
 } gameData;
 
 
 void initGame(gameData* p_data);
 void remplirTab(gameData* p_data);
-void playMove(gameData* p_data); //maj des snakes (dans data.joueurs)
+void playMove(gameData* p_data); //maj du snake 0 (dans data.joueurs)
+void takeMove(gameData* p_data); //maj du snake 1 (= snake adverse)
+void compteurUpdate(gameData* p_data);
 void calcNxtMove(gameData* p_data);
 void initsnake();
