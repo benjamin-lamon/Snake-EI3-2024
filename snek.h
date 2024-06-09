@@ -54,8 +54,8 @@ typedef struct gameData_{
 
 void initGame(gameData* p_data);
 void remplirTab(gameData* p_data);
-void playMove(gameData* p_data); //maj du snake 0 (dans data.joueurs)
-void takeMove(gameData* p_data); //maj du snake 1 (= snake adverse)
+int playMove(gameData* p_data); //maj du snake 0 (dans data.joueurs)
+int takeMove(gameData* p_data); //maj du snake 1 (= snake adverse)
 void compteurUpdate(gameData* p_data);
-void calcNxtMove(gameData* p_data);
 void initsnake();
+t_move playRandom(gameData* p_data);
